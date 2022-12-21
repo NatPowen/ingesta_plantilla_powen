@@ -1,0 +1,70 @@
+from simple_salesforce import Salesforce
+import requests
+import pandas as pd
+from io import StringIO
+import pymysql
+import numpy as np
+from utils import create_insert_query,create_table_query
+from datetime import datetime
+user = ''
+host = ''
+passw = ''
+port = 
+database = ''
+table_name = "salesforce_opportunity"
+
+
+if __name__ == '__main__':
+
+    print("######### EXECUTION "+str(datetime.now())+" #########")
+
+    ##### Extract data from Salesforce #####
+    sf = Salesforce(instance_url='https://powen.my.salesforce.com',username='', password='', security_token='')
+    desc = sf.Opportunity.describe()
+    field_names = [field['name'] for field in desc['fields']]
+    soql = "SELECT {} FROM Opportunity".format(','.join(field_names))
+    sf_data = sf.query_all(soql)
+    sf_df = pd.DataFrame(sf_data['records']).drop(columns='attributes')
+    print(f"{table_name} read from Salesforce" )
+    #############################
+
+
+    # CONNECT TO MYSQL DATABASE
+    conn = pymysql.connect(host=host,
+                           port=port,
+                           user=user,
+                           passwd=passw,
+                           db=database,
+                           charset='utf8')
+    cursor = conn.cursor()
+
+    # DROP NULLS
+    sf_df = sf_df.replace(np.nan, '', regex=True)
+    ######
+
+    #CREATE TABLE IF NOT EXISTS
+    cursor.execute(create_table_query(df=sf_df, table_name=table_name))
+    print(f"Creating table {table_name} if not exists")
+
+    ### TRUNCATE TABLE
+    cursor.execute(f"truncate table {table_name}")
+    print("Truncated table")
+
+
+    #Generate insert query
+    query = create_insert_query(df=sf_df, table_name=table_name)
+
+    #### Inserccion en mysql ####
+    data = []
+    for i, row in sf_df.iterrows():
+        data.append(tuple(row))
+    cursor.executemany(query, data)
+    conn.commit()
+    ##############
+
+    ##### cerrar la sesion de mysql####
+    cursor.close()
+    #############
+
+    print("Records inserted")
+    print("######### ENDS EXECUTION #########")
