@@ -1,0 +1,92 @@
+import pymysql
+from datetime import datetime
+
+
+
+
+
+user = ''
+host = ''
+passw =  ''
+port = 
+database = ''
+
+
+if __name__ == '__main__':
+
+    print("######### EXECUTION "+str(datetime.now())+" #########")
+    # CONNECT TO MYSQL DATABASE
+    conn = pymysql.connect(host=host,
+                           port=port,
+                           user=user,
+                           passwd=passw,
+                           db=database,
+                           charset='utf8')
+    cursor = conn.cursor()
+
+
+    query = """
+            INSERT INTO powerbi.podio_6294_hist
+            select
+            A.id,
+A.no_oportunidad_saleforce,
+A.no_oportunidad_polaris,
+A.cliente_2,
+A.tipo_de_oportunidad,
+A.provincia,
+A.origen_nivel_1,
+A.origen_nivel_2,
+A.origen_nivel_3,
+A.tiene_prepago_100eur,
+A.estado,
+A.fecha_de_firma,
+A.ubicacion,
+A.email_solitante,
+A.telefono_del_cliente,
+A.numero_de_paneles,
+A.potencia_a_instalar,
+A.precio_del_proyecto_sin_iva_o_igic,
+A.coste_teorico_3,
+A.de_margen,
+A.fecha_a_pte_programar_2,
+A.created_date,
+A.created_by,
+A.modified_date,
+A.modified_by,
+A.responsable_de_cierre_de_visita,
+A.visitador_2,
+A.email_visitador,
+A.fecha_b_visita_programada_2,
+A.fecha_visita_confirmada,
+A.responsable_de_cierre,
+A.responsable_de_cierre_pbi,
+A.responsable_de_cierre_2,
+A.fecha_c_visitado_2,
+A.fecha_pdte_cerrar_contrato,
+A.fecha_d_visitado_con_cambios,
+A.tipo_de_tramite,
+A.fecha_ok_firma,
+A.fecha_o_cancelado,
+A.fecha_g_memoria_finalizada,
+A.fecha_de_creacion,
+A.fecha_j_instalacion_programada,
+A.fecha_l_instalacion_instalada,
+A.fecha_m_instalacion_entregada,
+A.pedido_material,
+A.fecha_inst_inicio_estimada,
+A.fecha_instalacion_legalizada,
+A.fecha_i_tramitacion_finalizada,
+A.fecha_concesion_tramite,
+A.fecha_htramitacion_iniciada,
+A.fecha_k_instalacion_en_curso,
+NOW() AS hist_creation_date
+    from powerbi.podio_6294 as A ;
+            """
+    cursor.execute(query)
+    conn.commit()
+    print("Records added to historification table")
+
+    ##### CLOSE MYSQL SESSION
+    cursor.close()
+    print("Records inserted")
+    print("######### ENDS EXECUTION #########")
